@@ -59,14 +59,12 @@ const RegisterForm = () => {
         });
       });
 
-      if (state?.success) {
-        toast.success("Your account has been created successfully!", {
-          duration: 3000,
-        });
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 3000);
-      }
+      toast.success("Your account has been created successfully!", {
+        duration: 3000,
+      });
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 3000);
     }
   }, [state]);
   return (
@@ -124,7 +122,7 @@ const RegisterForm = () => {
             </span>
             <InputFieldError field="password" state={state} />
           </Field>
-          
+
           {/* Confirm Password */}
           <Field className="relative">
             <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
