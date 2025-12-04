@@ -6,6 +6,7 @@ import { Input } from "./ui/input";
 import InputFieldError from "./shared/InputFieldError";
 import { toast } from "sonner";
 import { registerUser } from "@/services/auth/registerUser";
+import zxcvbn from "zxcvbn";
 
 const RegisterForm = () => {
   const [, startTransition] = useTransition();
@@ -21,12 +22,23 @@ const RegisterForm = () => {
     confirmPassword: "",
   });
 
+  const strength = zxcvbn(formData.password);
+
+  const strengthLabels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
+  const strengthColors = [
+    "#e63946",
+    "#ff6b6b",
+    "#f2c94c",
+    "#2d9cdb",
+    "#27ae60",
+  ];
+
   useEffect(() => {
     console.log(state);
     if (state && !state.success && state.message) {
       if (state.message === "Duplicate Key Error") {
         toast.error(
-          <div >
+          <div>
             <strong className="text-base">Email Already Registered!</strong>
             <div>
               The email you entered is already in use. Please use a different
@@ -112,6 +124,7 @@ const RegisterForm = () => {
             </span>
             <InputFieldError field="password" state={state} />
           </Field>
+          
           {/* Confirm Password */}
           <Field className="relative">
             <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
@@ -133,6 +146,27 @@ const RegisterForm = () => {
             </span>
             <InputFieldError field="confirmPassword" state={state} />
           </Field>
+          {formData.password && (
+            <div>
+              <div className="h-2 w-full bg-gray-200 rounded">
+                <div
+                  className="h-2 rounded"
+                  style={{
+                    width: `${(strength.score + 1) * 20}%`,
+                    backgroundColor: strengthColors[strength.score],
+                    transition: "0.3s",
+                  }}
+                ></div>
+              </div>
+
+              <p
+                className="text-sm mt-1"
+                style={{ color: strengthColors[strength.score] }}
+              >
+                {strengthLabels[strength.score]}
+              </p>
+            </div>
+          )}
         </div>
         <FieldGroup className="mt-4">
           <Field>
