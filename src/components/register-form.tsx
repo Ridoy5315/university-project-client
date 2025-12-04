@@ -1,16 +1,60 @@
-import { useActionState, useEffect } from "react";
+"use client";
+import { useActionState, useEffect, useState, useTransition } from "react";
 import { Button } from "./ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
 import InputFieldError from "./shared/InputFieldError";
 import { toast } from "sonner";
+import { registerUser } from "@/services/auth/registerUser";
 
 const RegisterForm = () => {
-     const [state, formAction, isPending] = useActionState(registerPatient, null);
+  const [, startTransition] = useTransition();
+  const [state, formAction, isPending] = useActionState(registerUser, null);
 
-     useEffect(() => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  useEffect(() => {
+    console.log(state);
     if (state && !state.success && state.message) {
-      toast.error(state.message);
+      if (state.message === "Duplicate Key Error") {
+        toast.error(
+          <div >
+            <strong className="text-base">Email Already Registered!</strong>
+            <div>
+              The email you entered is already in use. Please use a different
+              email or log in.
+            </div>
+          </div>
+        );
+      } else {
+        toast.error(state.message);
+      }
+    } else if (state?.success) {
+      startTransition(() => {
+        setFormData({
+          name: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+        });
+      });
+
+      if (state?.success) {
+        toast.success("Your account has been created successfully!", {
+          duration: 3000,
+        });
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 3000);
+      }
     }
   }, [state]);
   return (
@@ -20,19 +64,17 @@ const RegisterForm = () => {
           {/* Name */}
           <Field>
             <FieldLabel htmlFor="name">Full Name</FieldLabel>
-            <Input id="name" name="name" type="text" placeholder="John Doe" />
-            <InputFieldError field="name" state={state} />
-          </Field>
-          {/* Address */}
-          <Field>
-            <FieldLabel htmlFor="address">Address</FieldLabel>
             <Input
-              id="address"
-              name="address"
+              id="name"
+              name="name"
               type="text"
-              placeholder="123 Main St"
+              placeholder="John Doe"
+              value={formData.name} // controlled value
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
             />
-            <InputFieldError field="address" state={state} />
+            <InputFieldError field="name" state={state} />
           </Field>
           {/* Email */}
           <Field>
@@ -42,25 +84,53 @@ const RegisterForm = () => {
               name="email"
               type="email"
               placeholder="m@example.com"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
             />
             <InputFieldError field="email" state={state} />
           </Field>
           {/* Password */}
-          <Field>
+          <Field className="relative">
             <FieldLabel htmlFor="password">Password</FieldLabel>
-            <Input id="password" name="password" type="password" />
-
+            <Input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"} // toggle type
+              placeholder="*****"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+            />
+            <span
+              className="absolute left-57 top-9 cursor-pointer select-none"
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </span>
             <InputFieldError field="password" state={state} />
           </Field>
           {/* Confirm Password */}
-          <Field className="md:col-span-2">
+          <Field className="relative">
             <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
             <Input
               id="confirmPassword"
               name="confirmPassword"
-              type="password"
+              type={showConfirmPassword ? "text" : "password"} // toggle type
+              placeholder="*****"
+              value={formData.confirmPassword}
+              onChange={(e) =>
+                setFormData({ ...formData, confirmPassword: e.target.value })
+              }
             />
-
+            <span
+              className="absolute left-57 top-9 cursor-pointer select-none"
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+            >
+              {showConfirmPassword ? "🙈" : "👁️"}
+            </span>
             <InputFieldError field="confirmPassword" state={state} />
           </Field>
         </div>
@@ -80,7 +150,7 @@ const RegisterForm = () => {
         </FieldGroup>
       </FieldGroup>
     </form>
-  )
-}
+  );
+};
 
-export default RegisterForm
+export default RegisterForm;
