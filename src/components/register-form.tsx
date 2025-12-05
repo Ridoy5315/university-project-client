@@ -7,6 +7,8 @@ import InputFieldError from "./shared/InputFieldError";
 import { toast } from "sonner";
 import { registerUser } from "@/services/auth/registerUser";
 import zxcvbn from "zxcvbn";
+import { useDebounce } from "@/hooks/useDebounce";
+import { getPasswordSuggestion } from "@/services/ai/passwordSuggestion";
 
 const RegisterForm = () => {
   const [, startTransition] = useTransition();
@@ -22,6 +24,13 @@ const RegisterForm = () => {
     confirmPassword: "",
   });
 
+  // Debounce the name input
+  const debouncedName = useDebounce(formData.name, 800);
+
+  // AI Suggestion State
+  const [suggestedPassword, setSuggestedPassword] = useState("");
+  const [loadingSuggestion, setLoadingSuggestion] = useState(false);
+
   const strength = zxcvbn(formData.password);
 
   const strengthLabels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
@@ -32,6 +41,32 @@ const RegisterForm = () => {
     "#2d9cdb",
     "#27ae60",
   ];
+
+  // Fetch AI Suggestion when debouncedName changes
+  useEffect(() => {
+    async function fetchSuggestion() {
+      if (!debouncedName) return;
+
+      setLoadingSuggestion(true);
+      const suggestion = await getPasswordSuggestion(debouncedName);
+      setLoadingSuggestion(false);
+
+      if (suggestion) {
+        setSuggestedPassword(suggestion);
+      }
+    }
+
+    fetchSuggestion();
+  }, [debouncedName]);
+
+  const handlePassword = () => {
+    setFormData({
+      ...formData,
+      password: suggestedPassword,
+      confirmPassword: suggestedPassword,
+    });
+    setSuggestedPassword("")
+  };
 
   useEffect(() => {
     console.log(state);
@@ -59,12 +94,10 @@ const RegisterForm = () => {
         });
       });
 
-      toast.success("Your account has been created successfully!", {
-        duration: 3000,
-      });
+      toast.success("Your account has been created successfully!");
       setTimeout(() => {
         window.location.href = "/login";
-      }, 3000);
+      }, 2500);
     }
   }, [state]);
   return (
@@ -86,6 +119,11 @@ const RegisterForm = () => {
             />
             <InputFieldError field="name" state={state} />
           </Field>
+
+          {/* {loadingSuggestion && (
+            <div className="text-sm text-blue-500">Generating suggestion…</div>
+          )} */}
+
           {/* Email */}
           <Field>
             <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -101,6 +139,23 @@ const RegisterForm = () => {
             />
             <InputFieldError field="email" state={state} />
           </Field>
+
+          {/* AI Password Suggestion Box */}
+          {suggestedPassword && !loadingSuggestion && (
+            <div className="md:col-span-2 p-3 bg-green-50 border border-green-300 rounded text-green-700 text-sm flex justify-between items-center">
+              <span>
+                🔐 Suggested Password: <strong>{suggestedPassword}</strong>
+              </span>
+              <button
+                type="button"
+                className="text-blue-600 underline cursor-pointer"
+                onClick={handlePassword}
+              >
+                Use this
+              </button>
+            </div>
+          )}
+
           {/* Password */}
           <Field className="relative">
             <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -110,6 +165,7 @@ const RegisterForm = () => {
               type={showPassword ? "text" : "password"} // toggle type
               placeholder="*****"
               value={formData.password}
+              disabled={loadingSuggestion}
               onChange={(e) =>
                 setFormData({ ...formData, password: e.target.value })
               }
@@ -132,6 +188,7 @@ const RegisterForm = () => {
               type={showConfirmPassword ? "text" : "password"} // toggle type
               placeholder="*****"
               value={formData.confirmPassword}
+              disabled={loadingSuggestion}
               onChange={(e) =>
                 setFormData({ ...formData, confirmPassword: e.target.value })
               }
