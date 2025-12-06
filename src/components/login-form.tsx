@@ -20,7 +20,18 @@ const LoginForm = () => {
      useEffect(() => {
           console.log(state);
     if (state && !state.success && state.message) {
-      toast.error(state.message);
+       if (state.message === "No account found") {
+        toast.error(
+          <div>
+            <strong className="text-base">No account found!</strong>
+            <div>
+              No account found. Try again or register a new account.
+            </div>
+          </div>
+        );
+      } else {
+        toast.error(state.message);
+      }
     }
     else if (state?.success) {
       startTransition(() => {

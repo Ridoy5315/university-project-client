@@ -32,6 +32,10 @@ export const loginUser = async (_currentState: any, formData: any): Promise<any>
 
         const result = await res.json();
 
+        if(!result.success){
+            return result
+        }
+
         const setCookieHeaders = res.headers.getSetCookie();
 
         if (setCookieHeaders && setCookieHeaders.length > 0) {
