@@ -9,8 +9,10 @@ import { registerUser } from "@/services/auth/registerUser";
 import zxcvbn from "zxcvbn";
 import { useDebounce } from "@/hooks/useDebounce";
 import { getPasswordSuggestion } from "@/services/ai/passwordSuggestion";
+import { useRouter } from "next/navigation";
 
 const RegisterForm = () => {
+  const router = useRouter();
   const [, startTransition] = useTransition();
   const [state, formAction, isPending] = useActionState(registerUser, null);
 
@@ -65,7 +67,7 @@ const RegisterForm = () => {
       password: suggestedPassword,
       confirmPassword: suggestedPassword,
     });
-    setSuggestedPassword("")
+    setSuggestedPassword("");
   };
 
   useEffect(() => {
@@ -94,12 +96,14 @@ const RegisterForm = () => {
         });
       });
 
-      toast.success("Your account has been created successfully!");
+      toast.success("Registration successful! Please verify your email.");
       setTimeout(() => {
-        window.location.href = "/login";
-      }, 2500);
+        startTransition(() => {
+          router.push(`/verifyOTP?email=${state?.data?.email}&name=${state?.data?.name}`);
+        });
+      }, 2000);
     }
-  }, [state]);
+  }, [state, router]);
   return (
     <form action={formAction}>
       <FieldGroup>
