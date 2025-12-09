@@ -1,21 +1,23 @@
 "use client";
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
 import InputFieldError from "./shared/InputFieldError";
 import { Button } from "./ui/button";
 import { loginUser } from "@/services/auth/loginUser";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
-     const [, startTransition] = useTransition();
+    //  const [, startTransition] = useTransition();
      const [state, formAction, isPending] = useActionState(loginUser, null);
      const [showPassword, setShowPassword] = useState(false);
+     const router = useRouter();
 
-     const [formData, setFormData] = useState({
-         email: "",
-         password: "",
-       });
+    //  const [formData, setFormData] = useState({
+    //      email: "",
+    //      password: "",
+    //    });
 
      useEffect(() => {
           console.log(state);
@@ -34,23 +36,24 @@ const LoginForm = () => {
       }
     }
     else if (state?.success) {
-      startTransition(() => {
-        setFormData({
-          email: "",
-          password: "",
-        });
-      });
+      // startTransition(() => {
+      //   setFormData({
+      //     email: "",
+      //     password: "",
+      //   });
+      // });
 
       toast.success("Your account has been created successfully!", {
-        duration: 3000,
+        duration: 2000,
       });
       setTimeout(() => {
-        window.location.href = "/";
-      }, 2000);
+        // window.location.href = "/";
+        router.push("/");
+      }, 1000);
     }
   }, [state]);
   return (
-    <form action={formAction}>
+    <form action={formAction} autoComplete="on">
       <FieldGroup>
         <div className="grid grid-cols-1 gap-4">
           {/* Email */}
@@ -61,10 +64,12 @@ const LoginForm = () => {
               name="email"
               type="email"
               placeholder="m@example.com"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              autoComplete="email"
+              // value={formData.email}
+              // onChange={(e) =>
+              //   setFormData({ ...formData, email: e.target.value })
+              // }
+              required
             />
 
             <InputFieldError field="email" state={state} />
@@ -78,10 +83,12 @@ const LoginForm = () => {
               name="password"
               type={showPassword ? "text" : "password"} 
               placeholder="*****"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
+              autoComplete="current-password"
+              // value={formData.password}
+              // onChange={(e) =>
+              //   setFormData({ ...formData, password: e.target.value })
+              // }
+              required
             />
             <span
               className="absolute left-88 top-9 cursor-pointer select-none"

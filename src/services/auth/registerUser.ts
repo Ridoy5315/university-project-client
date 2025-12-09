@@ -36,8 +36,6 @@ export const registerUser = async(_currentState: any, formData: any): Promise<an
 
         const result = await res.json();
 
-        console.log(result)
-
         return result;
      } catch (error: any) {
 

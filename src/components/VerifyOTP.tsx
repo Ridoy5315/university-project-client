@@ -50,7 +50,7 @@ const VerifyOTP = () => {
     const toastId = toast.loading("Sending OTP");
     try {
       const res = await sendOTP(email, name);
-      console.log(res);
+
       if (res.success) {
         toast.success("OTP send successfully", { id: toastId });
       }
