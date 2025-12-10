@@ -10,7 +10,6 @@ export const addCredential = async (
   _currentState: any,
   formData: any
 ): Promise<any> => {
-
   const userInfo = await getUserInfo();
   const user = userInfo?.data;
   console.log(user);
@@ -33,7 +32,7 @@ export const addCredential = async (
 
     const validatedPayload = validationResult.data;
 
-    console.log(validatedPayload, "validatedPayload")
+    console.log(validatedPayload, "validatedPayload");
 
     const res = await serverFetch.post("/credentials/add", {
       body: JSON.stringify(validatedPayload),
@@ -44,6 +43,40 @@ export const addCredential = async (
 
     if (!result.success) {
       throw new Error(result.message || "Failed to add credential");
+    }
+
+    return {
+      success: true,
+      message: "Credential Added Successfully",
+      data: result.data,
+    };
+  } catch (error: any) {
+    console.log(error);
+
+    return {
+      success: false,
+      message:
+        process.env.NODE_ENV === "development"
+          ? error.message
+          : "Failed to save credential. Please check your inputs and try again.",
+    };
+  }
+};
+
+export const getUserCredentials = async () => {
+  const userInfo = await getUserInfo();
+  const user = userInfo?.data;
+  console.log(user);
+
+  try {
+    const res = await serverFetch.get(
+      `/credentials/userCredentials?email=${user.email}`
+    );
+
+    const result = await res.json();
+
+    if (!result.success) {
+      throw new Error(result.message || "Failed to retrieve user credentials");
     }
 
     return {

@@ -9,14 +9,36 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { addCredential } from "@/services/credentials/credentials.service";
 import Link from "next/link";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { RenderSiteNameItems } from "./siteNameItems";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useRouter } from "next/navigation";
 
 const AddNewCredentialForm = () => {
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState(addCredential, null);
   const [showPassword, setShowPassword] = useState(false);
+  const [, startTransition] = useTransition();
+
+  const [siteName, setSiteName] = useState("");
+
+  const [formData, setFormData] = useState({
+    label: "",
+    siteName: "",
+    url: "",
+    username: "",
+    password: "",
+  });
 
   useEffect(() => {
     if (state && !state.success && state.message) {
@@ -24,7 +46,20 @@ const AddNewCredentialForm = () => {
     }
 
     if (state?.success) {
+      startTransition(() => {
+        setFormData({
+          label: "",
+          siteName: "",
+          url: "",
+          username: "",
+          password: "",
+        });
+      });
       toast.success("Credential saved successfully ✔️");
+
+      startTransition(() => {
+          router.push(`/credentials/view-all-credentials`);
+        });
     }
   }, [state]);
 
@@ -40,12 +75,16 @@ const AddNewCredentialForm = () => {
               name="label"
               type="text"
               placeholder="Personal Gmail, Work GitHub"
+              value={formData.label} // controlled value
+              onChange={(e) =>
+                setFormData({ ...formData, label: e.target.value })
+              }
             />
             <InputFieldError field="label" state={state} />
           </Field>
 
           {/* Site Name */}
-          <Field>
+          {/* <Field>
             <FieldLabel htmlFor="siteName">Website / App Name</FieldLabel>
             <Input
               id="siteName"
@@ -54,6 +93,31 @@ const AddNewCredentialForm = () => {
               placeholder="Gmail, GitHub, Facebook"
             />
             <InputFieldError field="siteName" state={state} />
+          </Field> */}
+
+          <Field>
+            <FieldLabel htmlFor="siteName">Website / App Name</FieldLabel>
+            <Input
+              id="siteName"
+              name="siteName"
+              type="hidden"
+              value={siteName}
+              readOnly
+            ></Input>
+            <Select
+              value={siteName}
+              onValueChange={(value) => setSiteName(value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a site" />
+              </SelectTrigger>
+              <SelectContent>
+                <ScrollArea className="h-56 w-full">
+                  <RenderSiteNameItems></RenderSiteNameItems>
+                </ScrollArea>
+              </SelectContent>
+            </Select>
+            <InputFieldError state={state} field="siteName" />
           </Field>
 
           {/* URL */}
@@ -64,6 +128,10 @@ const AddNewCredentialForm = () => {
               name="url"
               type="text"
               placeholder="https://example.com"
+              value={formData.url} // controlled value
+              onChange={(e) =>
+                setFormData({ ...formData, url: e.target.value })
+              }
             />
             <InputFieldError field="url" state={state} />
           </Field>
@@ -76,6 +144,10 @@ const AddNewCredentialForm = () => {
               name="username"
               type="text"
               placeholder="example@gmail.com"
+              value={formData.username} // controlled value
+              onChange={(e) =>
+                setFormData({ ...formData, username: e.target.value })
+              }
             />
             <InputFieldError field="username" state={state} />
           </Field>
@@ -91,6 +163,10 @@ const AddNewCredentialForm = () => {
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 className="pr-10"
+                value={formData.password} // controlled value
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
               />
               <button
                 type="button"
