@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -10,9 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ExternalLink, Eye, EyeOff, Pencil, Trash2 } from "lucide-react";
+import { ExternalLink, Eye, EyeOff} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { EditCredentialModal } from "./EditCredentialModal";
 
 interface Credential {
   id: string;
@@ -22,6 +22,7 @@ interface Credential {
   username: string;
   decryptedPassword: string;
   createdAt: string;
+  email: string;
 }
 
 interface CredentialsTableProps {
@@ -30,6 +31,7 @@ interface CredentialsTableProps {
 }
 
 export default function CredentialsTable({ data }: CredentialsTableProps) {
+
   const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="rounded-lg border shadow-sm p-4 bg-white">
@@ -94,19 +96,14 @@ export default function CredentialsTable({ data }: CredentialsTableProps) {
               </TableCell>
 
               <TableCell className="text-right flex gap-2 justify-end">
-                {/* View */}
-                <Link href={`/credentials/${item.id}`}>
-                  <Button size="icon" variant="outline">
-                    <Eye size={16} />
-                  </Button>
-                </Link>
 
                 {/* Edit */}
-                <Link href={`/credentials/edit/${item.id}`}>
+                {/* <Link href={`/credentials/edit/${item.id}`}>
                   <Button size="icon" variant="outline">
                     <Pencil size={16} />
                   </Button>
-                </Link>
+                </Link> */}
+                <EditCredentialModal credential={item} ></EditCredentialModal>
 
                 {/* Delete */}
                 {/* <Button

@@ -71,7 +71,6 @@ const RegisterForm = () => {
   };
 
   useEffect(() => {
-    console.log(state);
     if (state && !state.success && state.message) {
       if (state.message === "Duplicate Key Error") {
         toast.error(

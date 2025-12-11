@@ -20,7 +20,7 @@ const LoginForm = () => {
     //    });
 
      useEffect(() => {
-          console.log(state);
+
     if (state && !state.success && state.message) {
        if (state.message === "No account found") {
         toast.error(

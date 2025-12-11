@@ -1,3 +1,4 @@
+
 import CredentialsTable from "@/components/modules/Credentials/CredentialsTable"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,7 +8,6 @@ import { getUserCredentials } from "@/services/credentials/credentials.service"
 const ViewAllCredentialsPage = async() => {
   const credentials = await getUserCredentials();
   const userCredentials = credentials?.data;
-  console.log(userCredentials);
   return (
 
 <div className="w-full px-4 md:px-10 lg:px-20 py-6">
